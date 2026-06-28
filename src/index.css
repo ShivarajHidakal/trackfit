@@ -326,6 +326,67 @@ select {
 .add-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .add-row .btn-primary { flex: 0 0 auto; }
 
+/* ---------- Smart add-meal ---------- */
+.addmeal { display: flex; flex-direction: column; gap: 10px; }
+.addmeal-row { display: flex; gap: 9px; align-items: stretch; }
+.addmeal-row .ac { flex: 1; min-width: 0; }
+.addmeal-field { width: 100%; }
+.addmeal-add { flex: 0 0 auto; align-self: stretch; padding: 0 16px; white-space: nowrap; }
+
+/* result preview: replaces the wall of input boxes */
+.preview {
+  border-radius: var(--radius-sm); padding: 12px 13px;
+  display: flex; flex-direction: column; gap: 11px;
+  animation: pvIn 0.16s ease-out;
+}
+@keyframes pvIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+.preview.on { background: var(--lime-dim); border: 1px solid rgba(var(--accent-rgb), 0.28); }
+.preview.miss { background: rgba(255, 194, 75, 0.09); border: 1px solid rgba(255, 194, 75, 0.22); }
+
+.pv-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pv-name { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13.5px; color: var(--text); }
+.pv-name .dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--lime); box-shadow: 0 0 8px var(--lime-glow); }
+.pv-name b { color: var(--lime); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-miss { color: #f0cd86; }
+.pv-miss .dot { background: var(--warn); box-shadow: none; }
+.pv-src {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-3); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; flex: 0 0 auto;
+}
+
+/* inline qty -/+ */
+.pv-qty { display: flex; align-items: center; gap: 0; flex: 0 0 auto; border: 1px solid var(--line-2); border-radius: 999px; overflow: hidden; background: var(--elev); }
+.pv-qty button {
+  width: 32px; height: 32px; border: none; background: transparent; color: var(--lime);
+  font-size: 20px; font-weight: 700; cursor: pointer; line-height: 1;
+}
+.pv-qty button:active { background: rgba(var(--accent-rgb), 0.18); }
+.pv-qty span { min-width: 52px; text-align: center; font-weight: 700; font-size: 14px; color: var(--text); }
+.pv-qty span i { font-style: normal; color: var(--text-3); font-size: 11px; margin-left: 1px; }
+
+/* big number + macro pills */
+.pv-macros { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pv-kcal { font-family: 'Oswald'; font-weight: 700; font-size: 30px; color: var(--lime); line-height: 1; }
+.pv-kcal i { font-style: normal; font-size: 13px; color: var(--text-3); font-family: 'Inter', sans-serif; font-weight: 600; margin-left: 6px; }
+.pv-pcf { display: flex; gap: 7px; }
+.pv-pcf span {
+  font-size: 12px; font-weight: 600; color: var(--text-2);
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px 11px;
+}
+.pv-pcf b { color: var(--text); font-weight: 800; margin-right: 2px; }
+
+.pv-edit { margin-top: 1px; }
+
+.pv-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 2px; }
+.linklike {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: var(--lime); font-size: 12.5px; font-weight: 600; font-family: inherit;
+}
+.linklike:active { opacity: 0.7; }
+.savelib { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12.5px; color: var(--text-2); user-select: none; }
+.savelib input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
+
 /* ---------- List rows ---------- */
 
 .item { border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.02); padding: 11px 13px; }

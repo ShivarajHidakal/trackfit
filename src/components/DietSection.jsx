@@ -19,6 +19,7 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
   const [perUnit, setPerUnit] = useState(null) // macros per 1 unit, enables scaling
   const [match, setMatch] = useState(null) // { name } | null
   const [manual, setManual] = useState(false) // user typed macros by hand
+  const [showAdjust, setShowAdjust] = useState(false) // reveal manual macro inputs
 
   const totals = mealTotals(entry.meals)
   const calTarget = settings.calorieTarget || 0
@@ -75,6 +76,7 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
   // Selecting from the dropdown (preset recipe, DB food, or saved library food).
   const onPick = (item) => {
     setManual(false)
+    setShowAdjust(false)
     if (item.__preset) {
       // Expand the recipe into its ingredients and fill the summed macros.
       const est = estimateMeal(item.recipe)
@@ -154,6 +156,7 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
   }
 
   const formKcal = atwater(form.protein, form.carbs, form.fat)
+  const qtyStep = form.unit === 'pc' ? 1 : 10
 
   const addMeal = () => {
     if (!form.desc.trim()) return
@@ -183,6 +186,7 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
     setPerUnit(null)
     setMatch(null)
     setManual(false)
+    setShowAdjust(false)
   }
 
   const removeMeal = (id) => onUpdate({ meals: entry.meals.filter((m) => m.id !== id) })
@@ -208,6 +212,11 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
       value: { name: f.name },
     })),
   ]
+
+  const P = Math.round(num(form.protein))
+  const C = Math.round(num(form.carbs))
+  const F = Math.round(num(form.fat))
+  const showEdit = showAdjust || (form.desc.trim() && !match)
 
   return (
     <Card icon="🍽" title="Diet">
@@ -257,32 +266,52 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
 
       <div className="divline" />
 
-      {/* Smart add-meal form */}
-      <div className="field">
-        <label className="label">Add meal — type a food, macros auto-fill</label>
-        <Autocomplete
-          value={form.desc}
-          onChange={onDesc}
-          onPick={onPick}
-          suggestions={suggestions}
-          placeholder="e.g. 150g chicken breast, 2 eggs, smoothie…"
-          name="food"
-        />
-      </div>
+      {/* ===== Smart add-meal: one field, the rest auto-fills ===== */}
+      <div className="addmeal">
+        <label className="label">Add a meal</label>
+        <div className="addmeal-row">
+          <Autocomplete
+            className="addmeal-field"
+            value={form.desc}
+            onChange={onDesc}
+            onPick={onPick}
+            suggestions={suggestions}
+            placeholder="Type a food… chicken, 2 eggs, smoothie"
+            name="food"
+          />
+          <button className="btn btn-primary addmeal-add" onClick={addMeal} disabled={!form.desc.trim()}>
+            + Add
+          </button>
+        </div>
 
-      {/* Match status */}
-      {form.desc.trim() && (
-        <div className={`match ${match ? 'hit' : 'miss'}`}>
-          {match ? (
-            match.single ? (
+        {form.desc.trim() && (
+          <div className={`preview ${match ? 'on' : 'miss'}`}>
+            {/* single food → name + inline qty stepper + result */}
+            {match && match.single && (
+              <div className="pv-head">
+                <div className="pv-name">
+                  <span className="dot" />
+                  <b>{match.name}</b>
+                  <span className="pv-src">{match.lib ? 'library' : 'database'}</span>
+                </div>
+                {perUnit && !manual && (
+                  <div className="pv-qty">
+                    <button type="button" aria-label="less" onClick={() => changeQty(Math.max(0, num(form.qty) - qtyStep))}>−</button>
+                    <span className="num">{form.qty || 0}<i>{form.unit === 'pc' ? 'pc' : 'g'}</i></span>
+                    <button type="button" aria-label="more" onClick={() => changeQty(num(form.qty) + qtyStep)}>+</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* multiple foods → per-ingredient breakdown */}
+            {match && !match.single && (
               <>
-                <span className="dot" /> Auto-filled from {match.lib ? 'your library' : 'food database'}:{' '}
-                <b>{match.name}</b>
-              </>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 7, width: '100%' }}>
-                <div>
-                  <span className="dot" /> Per-ingredient breakdown (<b>{match.matchedCount}</b>/{match.totalCount}):
+                <div className="pv-head">
+                  <div className="pv-name">
+                    <span className="dot" />
+                    <b>{match.matchedCount}/{match.totalCount}</b>&nbsp;items matched
+                  </div>
                 </div>
                 <div className="ing-list">
                   {match.items.map((it, i) => (
@@ -294,9 +323,7 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
                       {it.matched ? (
                         <div className="ing-r">
                           <span className="ing-cal num">{it.calories} kcal</span>
-                          <span className="ing-macros num">
-                            {it.protein}P · {it.carbs}C · {it.fat}F
-                          </span>
+                          <span className="ing-macros num">{it.protein}P · {it.carbs}C · {it.fat}F</span>
                         </div>
                       ) : (
                         <span className="ing-na">not found</span>
@@ -304,56 +331,54 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
                     </div>
                   ))}
                 </div>
-                {match.matchedCount < match.totalCount && (
-                  <div className="tiny" style={{ opacity: 0.85 }}>
-                    “?” items aren’t in the database — adjust the macros below to include them.
-                  </div>
-                )}
-              </div>
-            )
-          ) : (
-            <>
-              <span className="dot" /> Not in database — enter macros below (calories auto-calculate)
-            </>
-          )}
-        </div>
-      )}
+              </>
+            )}
 
-      <div className="row">
-        {(!match || match.single) && (
-          <div className="field" style={{ flex: '0 0 38%' }}>
-            <label className="label">Qty ({form.unit === 'pc' ? 'pcs' : 'grams'})</label>
-            <input
-              type="number"
-              inputMode="decimal"
-              value={form.qty}
-              onChange={(e) => changeQty(e.target.value)}
-              placeholder={form.unit === 'pc' ? 'pcs' : 'g'}
-            />
+            {/* not in database → gentle prompt */}
+            {!match && (
+              <div className="pv-name pv-miss">
+                <span className="dot" /> New food — add its macros below
+              </div>
+            )}
+
+            {/* the big number + macro pills */}
+            <div className="pv-macros">
+              <div className="pv-kcal num">
+                {formKcal}<i>kcal{match && !match.single ? ' total' : ''}</i>
+              </div>
+              <div className="pv-pcf">
+                <span><b className="num">{P}</b>P</span>
+                <span><b className="num">{C}</b>C</span>
+                <span><b className="num">{F}</b>F</span>
+              </div>
+            </div>
+
+            {/* hidden-by-default manual macro editor */}
+            {showEdit && (
+              <div className="grid3 pv-edit">
+                <MacroInput label="Protein" v={form.protein} on={(v) => editMacro('protein', v)} />
+                <MacroInput label="Carbs" v={form.carbs} on={(v) => editMacro('carbs', v)} />
+                <MacroInput label="Fat" v={form.fat} on={(v) => editMacro('fat', v)} />
+              </div>
+            )}
+
+            <div className="pv-foot">
+              {match && (
+                <button type="button" className="linklike" onClick={() => setShowAdjust((s) => !s)}>
+                  {showAdjust ? 'Done' : '✎ Adjust macros'}
+                </button>
+              )}
+              <label className="savelib">
+                <input
+                  type="checkbox"
+                  checked={form.saveToLibrary}
+                  onChange={(e) => set('saveToLibrary', e.target.checked)}
+                />
+                <span>Save to library</span>
+              </label>
+            </div>
           </div>
         )}
-        <div className="field">
-          <label className="label">Calories (auto)</label>
-          <div className="kcal-auto num">{formKcal} kcal</div>
-        </div>
-      </div>
-
-      <div className="grid3">
-        <MacroInput label="Protein" v={form.protein} on={(v) => editMacro('protein', v)} />
-        <MacroInput label="Carbs" v={form.carbs} on={(v) => editMacro('carbs', v)} />
-        <MacroInput label="Fat" v={form.fat} on={(v) => editMacro('fat', v)} />
-      </div>
-
-      <div className="add-row">
-        <Toggle
-          checked={form.saveToLibrary}
-          onChange={(v) => set('saveToLibrary', v)}
-          tone="iron"
-          label="Save to library"
-        />
-        <button className="btn btn-primary" onClick={addMeal} disabled={!form.desc.trim()}>
-          + Add meal
-        </button>
       </div>
 
       <div className="divline" />
