@@ -3,6 +3,7 @@ import { Card, Stepper } from './ui.jsx'
 import { PHASES } from '../lib/constants.js'
 import { storageBackend } from '../lib/storage.js'
 import { downloadBackup, importBackupFile } from '../lib/backup.js'
+import CloudSync from './CloudSync.jsx'
 
 export default function Settings({ settings, foods, onChange, onDeleteFood }) {
   const set = (k, v) => onChange({ ...settings, [k]: v })
@@ -37,6 +38,8 @@ export default function Settings({ settings, foods, onChange, onDeleteFood }) {
 
   return (
     <div className="stack">
+      <CloudSync />
+
       <Card icon="🎯" title="Targets">
         <div className="field">
           <label className="label">Current phase</label>

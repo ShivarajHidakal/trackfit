@@ -13,6 +13,7 @@ import {
 import { emptyEntry } from './lib/constants.js'
 import { todayKey, addDays, prettyDate, isToday } from './lib/dates.js'
 import { num } from './lib/calc.js'
+import { initCloud } from './lib/cloud.js'
 
 import DietSection from './components/DietSection.jsx'
 import TrainingSection from './components/TrainingSection.jsx'
@@ -44,23 +45,32 @@ export default function App() {
   const skipSave = useRef(true)
   const savedTimer = useRef(null)
 
-  // Initial load
+  // Load (or reload) everything from local storage into React state.
+  const loadAll = async () => {
+    const [s, f, ex, all] = await Promise.all([
+      loadSettings(),
+      loadFoods(),
+      loadExercises(),
+      loadAllEntries(),
+    ])
+    setSettings(s)
+    setFoods(f)
+    setExerciseLib(ex)
+    const map = Object.fromEntries(all.map((e) => [e.date, e]))
+    setEntries(map)
+    skipSave.current = true
+    setEntry(map[date] || emptyEntry(date))
+    setReady(true)
+  }
+
+  // Initial load + start cloud sync. When a sign-in merges cloud data into local
+  // storage, cloud.js fires 'trackfit:synced' and we reload state to show it.
   useEffect(() => {
-    ;(async () => {
-      const [s, f, ex, all] = await Promise.all([
-        loadSettings(),
-        loadFoods(),
-        loadExercises(),
-        loadAllEntries(),
-      ])
-      setSettings(s)
-      setFoods(f)
-      setExerciseLib(ex)
-      const map = Object.fromEntries(all.map((e) => [e.date, e]))
-      setEntries(map)
-      setEntry(map[date] || emptyEntry(date))
-      setReady(true)
-    })()
+    loadAll()
+    initCloud()
+    const onSynced = () => loadAll()
+    window.addEventListener('trackfit:synced', onSynced)
+    return () => window.removeEventListener('trackfit:synced', onSynced)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

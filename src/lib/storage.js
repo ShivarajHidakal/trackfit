@@ -60,7 +60,44 @@ const windowAdapter = {
   },
 }
 
-export const storage = hasWindowStorage ? windowAdapter : localAdapter
+const base = hasWindowStorage ? windowAdapter : localAdapter
+
+// Optional cloud mirror, installed by cloud.js once a user signs in. Every local
+// write is also pushed to the cloud; failures are logged but never block the UI.
+let mirror = null
+export function setMirror(m) {
+  mirror = m
+}
+
+export const storage = {
+  get: (key) => base.get(key),
+  list: (prefix) => base.list(prefix),
+  async set(key, value) {
+    await base.set(key, value)
+    if (mirror) {
+      try {
+        await mirror.set(key, value)
+      } catch (e) {
+        console.warn('[trackfit] cloud sync (set) failed:', e)
+      }
+    }
+  },
+  async delete(key) {
+    await base.delete(key)
+    if (mirror) {
+      try {
+        await mirror.delete(key)
+      } catch (e) {
+        console.warn('[trackfit] cloud sync (delete) failed:', e)
+      }
+    }
+  },
+}
+
+// Local-only writes used by cloud.js when pulling cloud data DOWN to this device
+// (so a download doesn't bounce straight back up to the cloud).
+export const setLocal = (key, value) => base.set(key, value)
+export const deleteLocal = (key) => base.delete(key)
 
 export const storageBackend = hasWindowStorage ? 'window.storage' : 'localStorage'
 
