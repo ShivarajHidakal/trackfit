@@ -61,12 +61,12 @@ export const FOOD_DB = [
   // ---- Veg ----
   food('Broccoli', 'g', { kcal: 34, p: 2.8, c: 7, f: 0.4 }, [], 100),
 
-  // ---- Indian home meals (macros per 100g cooked, cooking oil included) ----
-  // Medium-thick dal with a tadka — home/maid style. ~1 katori ≈ 200 g.
-  food('Dal (home, medium-thick)', 'g', { kcal: 104, p: 5, c: 12, f: 4 },
+  // ---- Indian home meals (macros per 100g cooked, light home oil included) ----
+  // Medium-thick dal, lightly tempered — home/maid style. ~1 katori ≈ 200 g.
+  food('Dal (home, medium-thick)', 'g', { kcal: 86, p: 5, c: 12, f: 2 },
     ['dal', 'daal', 'dhal', 'dal tadka', 'toor dal', 'moong dal', 'lentil curry', 'lentils cooked'], 200),
-  // Generic mixed-veg sabji cooked in oil — covers most everyday sabjis.
-  food('Sabji (mixed veg, with oil)', 'g', { kcal: 100, p: 2.5, c: 9, f: 6 },
+  // Mixed-veg sabji, lightly cooked in mustard oil — covers most everyday sabjis.
+  food('Sabji (mixed veg, light oil)', 'g', { kcal: 82, p: 2.5, c: 9, f: 4 },
     ['sabji', 'sabzi', 'subji', 'subzi', 'bhaji', 'vegetable curry', 'mixed veg', 'veg curry'], 150),
 
   // ---- Sweeteners ----
