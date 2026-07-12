@@ -558,6 +558,22 @@ select {
 .seg button.on.good { background: var(--lime); border-color: var(--lime); color: #0a0c10; box-shadow: 0 0 16px var(--lime-glow); }
 .seg button.on.iron { background: var(--lime); border-color: var(--lime); color: #0a0c10; }
 
+/* ---------- Weekly Plan (Diet quick-complete + Settings editor) ---------- */
+
+.mealplan-toggles { display: flex; flex-wrap: wrap; gap: 14px 20px; }
+
+.planday { display: flex; align-items: center; gap: 12px; padding: 6px 0; flex-wrap: wrap; }
+.planday-label { width: 36px; flex: 0 0 auto; font-size: 12px; font-weight: 700; color: var(--text-2); }
+
+.planmeal { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.planmeal:last-child { border-bottom: none; }
+.planmeal-no { font-size: 12px; font-weight: 700; color: var(--text-2); }
+.planmeal-field { width: 100%; }
+
+.planworkout { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.planworkout:last-child { border-bottom: none; }
+.planworkout-head { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+
 /* ---------- Misc ---------- */
 
 .empty { text-align: center; color: var(--text-3); font-size: 13px; padding: 18px 8px; }

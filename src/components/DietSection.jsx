@@ -26,6 +26,33 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
   const calNow = Math.round(totals.calories)
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
+  // Quick-complete: toggling a planned meal on/off logs/removes it in one tap,
+  // tagged with its plan slot so the toggle state and removal stay exact.
+  const mealPlan = settings.mealPlan || []
+  const hasSlot = (i) => entry.meals.some((m) => m.planSlot === i)
+  const toggleSlot = (i, on) => {
+    if (on) {
+      const m = mealPlan[i]
+      onUpdate({
+        meals: [
+          ...entry.meals,
+          {
+            id: 'm' + Date.now().toString(36),
+            planSlot: i,
+            description: m.desc,
+            calories: num(m.calories),
+            protein: num(m.protein),
+            carbs: num(m.carbs),
+            fat: num(m.fat),
+            loggedAt: nowTime(),
+          },
+        ],
+      })
+    } else {
+      onUpdate({ meals: entry.meals.filter((meal) => meal.planSlot !== i) })
+    }
+  }
+
   // Live: typing food(s) auto-fills macros. Handles multiple items in one field
   // ("2 eggs, 10ml mustard oil and 300g rice") by summing each component.
   const onDesc = (v) => {
@@ -262,6 +289,28 @@ export default function DietSection({ entry, settings, foods, onUpdate, onSaveFo
             </div>
           ))}
         </div>
+      )}
+
+      {mealPlan.some((m) => m.desc) && (
+        <>
+          <div className="divline" />
+          <div className="field">
+            <label className="label">Quick complete</label>
+            <div className="mealplan-toggles">
+              {mealPlan.map(
+                (m, i) =>
+                  m.desc && (
+                    <Toggle
+                      key={i}
+                      label={`Meal ${i + 1}`}
+                      checked={hasSlot(i)}
+                      onChange={(v) => toggleSlot(i, v)}
+                    />
+                  )
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       <div className="divline" />

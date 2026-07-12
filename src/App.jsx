@@ -11,7 +11,7 @@ import {
   recordExerciseSession,
 } from './lib/db.js'
 import { emptyEntry } from './lib/constants.js'
-import { todayKey, addDays, prettyDate, isToday } from './lib/dates.js'
+import { todayKey, addDays, prettyDate, isToday, weekdayAbbr } from './lib/dates.js'
 import { num } from './lib/calc.js'
 import { initCloud } from './lib/cloud.js'
 
@@ -22,6 +22,17 @@ import ReelSection from './components/ReelSection.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import Settings from './components/Settings.jsx'
 import { SaveHint } from './components/ui.jsx'
+
+// A never-saved day defaults its training type from the weekly split so Push
+// day shows up automatically instead of needing a manual pill tap.
+function entryForDate(date, entries, settings) {
+  const stored = entries[date]
+  if (stored) return stored
+  const fresh = emptyEntry(date)
+  const dayType = settings?.weeklySplit?.[weekdayAbbr(date)]
+  if (dayType) fresh.training.type = dayType
+  return fresh
+}
 
 const TABS = [
   { id: 'today', label: 'Today', ic: '📓' },
@@ -59,7 +70,7 @@ export default function App() {
     const map = Object.fromEntries(all.map((e) => [e.date, e]))
     setEntries(map)
     skipSave.current = true
-    setEntry(map[date] || emptyEntry(date))
+    setEntry(entryForDate(date, map, s))
     setReady(true)
   }
 
@@ -78,7 +89,7 @@ export default function App() {
   useEffect(() => {
     if (!ready) return
     skipSave.current = true
-    setEntry(entries[date] || emptyEntry(date))
+    setEntry(entryForDate(date, entries, settings))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date])
 
@@ -193,7 +204,12 @@ export default function App() {
               onUpdate={updateEntry}
               onSaveFood={handleSaveFood}
             />
-            <TrainingSection entry={entry} exerciseLib={exerciseLib} onUpdate={updateEntry} />
+            <TrainingSection
+              entry={entry}
+              settings={settings}
+              exerciseLib={exerciseLib}
+              onUpdate={updateEntry}
+            />
             <ReelSection entry={entry} allEntries={allEntriesArr} onUpdate={updateEntry} />
           </div>
         )}
@@ -204,6 +220,7 @@ export default function App() {
           <Settings
             settings={settings}
             foods={foods}
+            exerciseLib={exerciseLib}
             onChange={handleSettings}
             onDeleteFood={handleDeleteFood}
           />

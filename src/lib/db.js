@@ -58,6 +58,22 @@ export async function deleteFood(slug) {
   await storage.delete(`food:${slug}`)
 }
 
+/* ---------- Reset ---------- */
+
+// Wipes every logged day, saved food, and exercise history — used to start a
+// fresh log without losing Settings (targets, weekly split, meal/workout
+// plan). storage.delete() mirrors to the cloud too when signed in, so this
+// clears Firestore for the account as well.
+export async function resetLoggedData() {
+  const keys = await storage.list('')
+  const toDelete = keys.filter(
+    (k) => k.startsWith('entry:') || k.startsWith('food:') || k.startsWith('exercise:')
+  )
+  for (const key of toDelete) {
+    await storage.delete(key)
+  }
+}
+
 /* ---------- Exercise library (autocomplete + last-time lookup) ---------- */
 
 export async function loadExercises() {

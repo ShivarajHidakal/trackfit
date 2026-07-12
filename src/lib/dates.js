@@ -43,6 +43,12 @@ export function isToday(key) {
   return key === todayKey()
 }
 
+// Weekday abbreviation for a date key, e.g. 'Mon'…'Sun'. Used to look up the
+// day's planned split in settings.weeklySplit.
+export function weekdayAbbr(key) {
+  return parseKey(key).toLocaleDateString('en-US', { weekday: 'short' })
+}
+
 // Current local time as HH:MM, for default meal timestamps.
 export function nowTime() {
   const d = new Date()

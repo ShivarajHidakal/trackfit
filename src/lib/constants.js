@@ -1,6 +1,11 @@
 // Shared vocabulary and defaults for the prep tracker.
 
+import { atwater } from './calc.js'
+import { estimateMeal } from './foodDatabase.js'
+
 export const DAY_TYPES = ['Push', 'Pull', 'Legs', 'Rest', 'Cardio Only']
+
+export const WEEKDAY_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 // Back and rear delts are deliberately split out — lat width/thickness and rear
 // delts are tracked weak-point priorities and must not be lumped under generic
@@ -35,6 +40,28 @@ export const REEL_STATUSES = ['Not Filmed', 'Filmed', 'Edited', 'Posted', 'Skipp
 
 export const PHASES = ['Lean Bulk', 'Maintenance', 'Contest Prep']
 
+// Meals repeated most days — resolved through the same food-matching engine
+// as the manual add-meal box, so macros stay consistent with the database.
+const MEAL_DESCRIPTIONS = [
+  '60gm oats, 250ml lactose free milk, 30gm peanut butter, one scoop pea protein',
+  '60gm oats, 250ml lactose free milk, 30gm peanut butter, one scoop pea protein',
+  '150gm cooked chicken breast, 300gm rice',
+  '3 chapati, 200gm rice, sabji, dal',
+]
+
+function defaultMealPlan() {
+  return MEAL_DESCRIPTIONS.map((desc) => {
+    const est = estimateMeal(desc)
+    return {
+      desc,
+      calories: atwater(est.protein, est.carbs, est.fat),
+      protein: est.protein,
+      carbs: est.carbs,
+      fat: est.fat,
+    }
+  })
+}
+
 export const DEFAULT_SETTINGS = {
   calorieTarget: 2800,
   proteinTarget: 200,
@@ -44,6 +71,10 @@ export const DEFAULT_SETTINGS = {
   targetBodyWeight: 80,
   cardioTarget: 4, // sessions per week
   maintenanceCalories: 2500, // TDEE — the reference for surplus/deficit
+  // Push/Pull/Legs repeats twice a week, Sunday off.
+  weeklySplit: { Mon: 'Push', Tue: 'Pull', Wed: 'Legs', Thu: 'Push', Fri: 'Pull', Sat: 'Legs', Sun: 'Rest' },
+  mealPlan: defaultMealPlan(),
+  workoutPlan: { Push: [], Pull: [], Legs: [] },
 }
 
 export function emptyEntry(date) {
@@ -52,7 +83,7 @@ export function emptyEntry(date) {
     bodyWeight: null,
     meals: [],
     skinCheck: { brokeOut: false, notes: '' },
-    training: { type: 'Rest', exercises: [], completed: false },
+    training: { type: 'Rest', exercises: [], completed: false, progressiveOverload: false },
     cardio: { done: false, type: 'Incline Treadmill', duration: 0 },
     reel: { status: 'Not Filmed', remarks: '' },
   }
