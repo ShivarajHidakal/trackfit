@@ -45,8 +45,8 @@ export const PHASES = ['Lean Bulk', 'Maintenance', 'Contest Prep']
 const MEAL_DESCRIPTIONS = [
   '60gm oats, 250ml lactose free milk, 30gm peanut butter, one scoop pea protein',
   '60gm oats, 250ml lactose free milk, 30gm peanut butter, one scoop pea protein',
-  '150gm cooked chicken breast, 300gm rice',
-  '3 chapati, 200gm rice, sabji, dal',
+  '150gm cooked chicken breast, 10ml mustard oil, 300gm rice',
+  '3 chapati, 200gm rice, sabji, dal, 10ml mustard oil',
 ]
 
 function defaultMealPlan() {
