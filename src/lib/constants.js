@@ -68,7 +68,7 @@ export const DEFAULT_SETTINGS = {
   carbTarget: 320,
   fatTarget: 70,
   phase: 'Lean Bulk',
-  targetBodyWeight: 80,
+  targetBodyWeight: null, // lean bulk has no target weight the way a cut does
   cardioTarget: 4, // sessions per week
   maintenanceCalories: 2500, // TDEE — the reference for surplus/deficit
   // Push/Pull/Legs repeats twice a week, Sunday off.
